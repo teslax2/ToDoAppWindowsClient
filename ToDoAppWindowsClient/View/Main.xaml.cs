@@ -60,11 +60,9 @@ namespace ToDoAppWindowsClient.View
 
                 AdminInitiateAuthResponse authResp = await _client.AdminInitiateAuthAsync(authReq);
 
-                authResp.AuthenticationResult.
-
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
