@@ -14,6 +14,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ToDoAppWindowsClient.Model;
+using ToDoAppWindowsClient.ViewModel;
 
 namespace ToDoAppWindowsClient.View
 {
@@ -22,15 +24,12 @@ namespace ToDoAppWindowsClient.View
     /// </summary>
     public partial class SignUp : Window
     {
-        private readonly string _clientId = ConfigurationManager.AppSettings["CLIENT_ID"];
-        private readonly string _poolId = ConfigurationManager.AppSettings["USERPOOL_ID"];
-        private AmazonCognitoIdentityProviderClient _client;
+        SignUpViewModel _viewModel;
 
-        public SignUp(AmazonCognitoIdentityProviderClient client)
+        public SignUp(AmazonCognitoIdentityProviderClient client, Creditentials creds)
         {
             InitializeComponent();
-
-            _client = client;
+            _viewModel = new SignUpViewModel(client, creds);
         }
 
         public SignUp()
@@ -40,48 +39,12 @@ namespace ToDoAppWindowsClient.View
 
         private async void SignUpButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                SignUpRequest signUpRequest = new SignUpRequest()
-                {
-                    ClientId = _clientId,
-                    Password = PasswordTextBox.Password,
-                    Username = UserNameTextBox.Text
-                };
-                AttributeType emailAttribute = new AttributeType()
-                {
-                    Name = "email",
-                    Value = EmailTextBox.Text
-                };
-                signUpRequest.UserAttributes.Add(emailAttribute);
-
-                var signUpResult = await _client.SignUpAsync(signUpRequest);
-            }
-            catch (Exception ex)
-            {
-                string message = ex.Message;
-                MessageBox.Show(message, "Sign Up Error");
-            }
+            await _viewModel.SignUp(PasswordTextBox.Password, UserNameTextBox.Text, EmailTextBox.Text);
         }
 
         private async void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                Amazon.CognitoIdentityProvider.Model.ConfirmSignUpRequest confirmRequest = new ConfirmSignUpRequest()
-                {
-                    Username = UserNameTextBox.Text,
-                    ClientId = _clientId,
-                    ConfirmationCode = ConfirmationTextBox.Text
-                };
-
-                var confirmResult = await _client.ConfirmSignUpAsync(confirmRequest);
-            }
-            catch (Exception ex)
-            {
-                string message = ex.Message;
-                MessageBox.Show(message, "Sign Up Error");
-            }
+            await _viewModel.Confirm(UserNameTextBox.Text, ConfirmationTextBox.Text);
         }
     }
 }

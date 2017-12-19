@@ -1,0 +1,1 @@
+{"Region":"eu-west-1","ClientId":"6fe7h5mc0d1jie4kupl8pmotm4","UserpoolId":"eu-west-1_16RFhD44d","IdentitypoolId":null,"IdentityProvider":null}

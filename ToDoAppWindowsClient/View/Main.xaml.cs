@@ -15,8 +15,8 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using System.Threading.Tasks;
 using System.Configuration;
+using ToDoAppWindowsClient.ViewModel;
 
 namespace ToDoAppWindowsClient.View
 {
@@ -25,10 +25,7 @@ namespace ToDoAppWindowsClient.View
     /// </summary>
     public partial class Main : Window
     {
-        private readonly AmazonCognitoIdentityProviderClient _client = new AmazonCognitoIdentityProviderClient();
-        private readonly string _clientId = ConfigurationManager.AppSettings["CLIENT_ID"];
-        private readonly string _poolId = ConfigurationManager.AppSettings["USERPOOL_ID"];
-
+        private MainViewModel _viewModel = new MainViewModel();
         public Main()
         {
             InitializeComponent();
@@ -36,38 +33,14 @@ namespace ToDoAppWindowsClient.View
 
         private void SignUpButton_Click(object sender, RoutedEventArgs e)
         {
-            SignUp signUpDlg = new SignUp(_client);
+            SignUp signUpDlg = new SignUp(_viewModel.client, _viewModel.creds);
             signUpDlg.ShowDialog();
         }
 
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            bool loggedIn = await CheckPasswordAsync(UserNameTextBox.Text, PasswordTextBox.Password);
+            _viewModel.LoggedIn = await _viewModel.CheckPasswordAsync(UserNameTextBox.Text, PasswordTextBox.Password);
         }
 
-        private async Task<bool> CheckPasswordAsync(string userName, string password)
-        {
-            try
-            {
-                var authReq = new AdminInitiateAuthRequest()
-                {
-                    UserPoolId = _poolId,
-                    ClientId = _clientId,
-                    AuthFlow = AuthFlowType.ADMIN_NO_SRP_AUTH
-                };
-                authReq.AuthParameters.Add("USERNAME", userName);
-                authReq.AuthParameters.Add("PASSWORD", password);
-
-                AdminInitiateAuthResponse authResp = await _client.AdminInitiateAuthAsync(authReq);
-
-                authResp.AuthenticationResult.
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
     }
 }
