@@ -13,7 +13,9 @@ namespace ToDoAppLambda.Model
         public string Date { get; set; }
         public int Status { get; set; }
 
-        public int GenerateId()
+        public Item() { }
+
+        public static int GenerateId()
         {
             var time = System.DateTime.Now.Ticks;
             var random = new System.Random();

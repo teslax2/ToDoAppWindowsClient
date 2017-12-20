@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace ToDoAppLambda.Model
 {
-    interface IOperations
+    interface IDbOperations
     {
         AmazonDynamoDBClient client { get; set; }
         string tableName { get; set; }
 
-        Task<PutItemResponse> PutItem(Item item);
-        Task<GetItemResponse> GetItem(Item item);
-        Task<UpdateItemResponse> UpdateItem(Item item);
-        Task<DeleteItemResponse> DeleteItem(Item item);
+        Task<ItemResponse> PutItem(Item item);
+        Task<ItemResponse> GetItem(Item item);
+        Task<ItemResponse> UpdateItem(Item item);
+        Task<ItemResponse> DeleteItem(Item item);
     }
 }

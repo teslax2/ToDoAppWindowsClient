@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace ToDoAppLambda.Model
 {
-    class DatabaseRequest : IOperations
+    class DatabaseRequest : IDbOperations
     {
         public AmazonDynamoDBClient client { get; set; }
         public string tableName { get; set; }
 
-        public DatabaseRequest(AmazonDynamoDBClient dbClient, string table)
+        public DatabaseRequest(string table)
         {
-            client = dbClient;
+            client = new AmazonDynamoDBClient();
             tableName = table;
         }
 
-        public async Task<DeleteItemResponse> DeleteItem(Item item)
+        public async Task<ItemResponse> DeleteItem(Item item)
         {
             var id = item.Id;
             var request = new DeleteItemRequest
@@ -26,10 +26,11 @@ namespace ToDoAppLambda.Model
                 TableName = tableName,
                 Key = new Dictionary<string, AttributeValue>() { { "TaskId", new AttributeValue { N = id.ToString() } }  },
             };
-            return await client.DeleteItemAsync(request);
+            var result = await client.DeleteItemAsync(request);
+            return new ItemResponse() { Status = result.HttpStatusCode.ToString() };
         }
 
-        public async Task<GetItemResponse> GetItem(Item item)
+        public async Task<ItemResponse> GetItem(Item item)
         {
             var id = item.Id;
             var request = new GetItemRequest
@@ -37,20 +38,31 @@ namespace ToDoAppLambda.Model
                 TableName = tableName,
                 Key = new Dictionary<string, AttributeValue>() { { "TaskId", new AttributeValue { N = id.ToString() } } },
             };
-            return await client.GetItemAsync(request);
+            var result = await client.GetItemAsync(request);
+            return new ItemResponse() {
+                Data = new Item()
+                {
+                    Title = result.Item["Title"].S,
+                    Date = result.Item["Date"].S,
+                    Message = result.Item["Message"].S,
+                    Status = Int32.Parse(result.Item["Status"].N),
+                    Id = Int32.Parse(result.Item["TaskId"].N)
+                },
+                Status = result.HttpStatusCode.ToString() };
         }
 
-        public async Task<PutItemResponse> PutItem(Item item)
+        public async Task<ItemResponse> PutItem(Item item)
         {
             var request = new PutItemRequest
             {
                 TableName = tableName,
                 Item = item.GetAttributes()
             };
-            return await client.PutItemAsync(request);
+            var result = await client.PutItemAsync(request);
+            return new ItemResponse() { Status = result.HttpStatusCode.ToString() };
         }
 
-        public async Task<UpdateItemResponse> UpdateItem(Item item)
+        public async Task<ItemResponse> UpdateItem(Item item)
         {
             var id = item.Id;
             var request = new UpdateItemRequest
@@ -58,8 +70,10 @@ namespace ToDoAppLambda.Model
                 TableName = tableName,
                 Key = new Dictionary<string, AttributeValue>() { { "TaskId", new AttributeValue { N = id.ToString() } } },
             };
-            return await client.UpdateItemAsync(request);
+            var result = await client.UpdateItemAsync(request);
+            return new ItemResponse() { Status = result.HttpStatusCode.ToString() };
         }
+
     }
 
 }
